@@ -4,13 +4,14 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using System.IO;
 
 namespace Company.Function
 {
     public static class resource_killer
     {
-        [FunctionName("resource_killer")]
-        public static void Run([TimerTrigger("0 30 11 * * *")]TimerInfo myTimer, ILogger log)
+        [FunctionName("ResourceKiller")]
+        public static void Run([TimerTrigger("0 0 1 * * *")]TimerInfo myTimer, ILogger log)
         {
                 var clientId = Environment.GetEnvironmentVariable("CLIENT_ID");
                 var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
@@ -21,10 +22,11 @@ namespace Company.Function
                                 clientSecret,
                                 tenantId, 
                                 AzureEnvironment.AzureGlobalCloud);
+
                 var azure = Azure
                 .Configure()
                 .Authenticate(credentials)
-                .WithDefaultSubscription();
+                .WithSubscription(Environment.GetEnvironmentVariable("SUBSCRIPTION_ID"));
 
                 var resourceGroups = azure.ResourceGroups.ListByTag("deleteme", "true");
 
